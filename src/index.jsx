@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { v4 as uuidv4 } from 'uuid';
+import classes from 'classnames';
 import Clock from './components/Clock';
 import TaskList from './components/TaskList';
 import Task from './components/Task';
@@ -8,18 +9,40 @@ import Task from './components/Task';
 import tasks from './mocks/list';
 import TaskCreateForm from './components/TaskCreateForm';
 import DropZone from './components/DropZone';
+import move from './utils/move';
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       showClock: true,
+      draggingElement: null,
+      draggingElementIndex: null,
       taskList: [],
     };
     this.handleButtonClick = this.handleButtonClick.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.handleCheck = this.handleCheck.bind(this);
     this.handleCreate = this.handleCreate.bind(this);
+    this.handleDragStart = this.handleDragStart.bind(this);
+    this.handleDrop = this.handleDrop.bind(this);
+    this.handleDragEnd = this.handleDragEnd.bind(this);
+  }
+
+  moveDraggingElementToPosition(to) {
+    const { draggingElement, taskList } = this.state;
+    const itemIndex = taskList.findIndex(
+      (listItem) => listItem.id === draggingElement.id
+    );
+    let newList;
+    if (itemIndex > to) {
+      newList = move(taskList, itemIndex, to);
+    } else if (itemIndex < to && to - itemIndex > 1) {
+      newList = move(taskList, itemIndex, Math.max(to - 1, 0));
+    } else {
+      newList = [...taskList];
+    }
+    return newList;
   }
 
   handleButtonClick() {
@@ -50,6 +73,31 @@ class App extends React.Component {
     });
   }
 
+  handleDragStart(id) {
+    const draggingElementIndex = this.state.taskList.findIndex(
+      (el) => el.id === id
+    );
+    this.setState({
+      draggingElement: this.state.taskList[draggingElementIndex],
+      draggingElementIndex,
+    });
+  }
+
+  handleDragEnd() {
+    this.setState({
+      draggingElement: null,
+      draggingElementIndex: null,
+    });
+  }
+
+  handleDrop(position) {
+    const taskList = this.moveDraggingElementToPosition(position);
+    this.handleDragEnd();
+    this.setState({
+      taskList,
+    });
+  }
+
   handleCreate(content) {
     this.setState({
       taskList: [
@@ -64,17 +112,30 @@ class App extends React.Component {
   }
 
   renderTaskList() {
-    const { taskList } = this.state;
+    const { taskList, draggingElementIndex } = this.state;
     return taskList.map((task, index) => (
-      <Task
-        key={task.id}
-        id={task.id}
-        checked={task.checked}
-        onDelete={this.handleDelete}
-        onCheck={this.handleCheck}
-      >
-        {index + 1} - {task.content}
-      </Task>
+      <React.Fragment key={task.id}>
+        <Task
+          id={task.id}
+          checked={task.checked}
+          onDragStart={this.handleDragStart}
+          onDelete={this.handleDelete}
+          onCheck={this.handleCheck}
+          onDragEnd={this.handleDragEnd}
+        >
+          {index + 1} - {task.content}
+        </Task>
+
+        <DropZone
+          className={classes({
+            'non-drop':
+              draggingElementIndex === index ||
+              draggingElementIndex === index + 1,
+          })}
+          position={index + 1}
+          onDrop={this.handleDrop}
+        />
+      </React.Fragment>
     ));
   }
 
@@ -97,7 +158,7 @@ class App extends React.Component {
 
   render() {
     const { version } = this.props;
-    const { showClock } = this.state;
+    const { showClock, draggingElementIndex } = this.state;
 
     return (
       <div>
@@ -105,8 +166,16 @@ class App extends React.Component {
         {/* {showClock && <Clock />}
         <button onClick={this.handleButtonClick}>Toggle clock</button> */}
         <TaskCreateForm onCreate={this.handleCreate} />
-        <DropZone />
-        <TaskList>{this.renderTaskList()}</TaskList>
+        <TaskList>
+          <DropZone
+            position={0}
+            className={classes({
+              'non-drop': draggingElementIndex === 0,
+            })}
+            onDrop={this.handleDrop}
+          />
+          {this.renderTaskList()}
+        </TaskList>
         {this.renderStatistics()}
       </div>
     );

@@ -11,8 +11,10 @@
   height: 5px;
   width: 100%;
   transition: height 0.5s, background-color 0.5s;
-  &.active {
-    height: 10px;
-    background-color: red;
+  &:not(.non-drop) {
+    &.active {
+      height: 10px;
+      background-color: red;
+    }
   }
 }

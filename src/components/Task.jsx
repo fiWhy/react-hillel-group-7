@@ -24,15 +24,19 @@ class Task extends React.Component {
   }
 
   handleDragStart() {
+    const { onDragStart, id } = this.props;
     this.setState({
       dragging: true,
     });
+    onDragStart(id);
   }
 
   handleDragEnd() {
+    const { onDragEnd } = this.props;
     this.setState({
       dragging: false,
     });
+    onDragEnd && onDragEnd();
   }
 
   render() {

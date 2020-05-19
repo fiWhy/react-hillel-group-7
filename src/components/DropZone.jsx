@@ -13,8 +13,9 @@ export default class DropZone extends React.Component {
     this.handleDragLeave = this.handleDragLeave.bind(this);
   }
 
-  handleDrop(e) {
-    console.log(e);
+  handleDrop() {
+    const { onDrop, position } = this.props;
+    onDrop(position);
     this.setState({
       active: false,
     });
@@ -38,6 +39,7 @@ export default class DropZone extends React.Component {
 
   render() {
     const { active } = this.state;
+    const { className } = this.props;
     return (
       <div
         onDrop={this.handleDrop}
@@ -45,6 +47,7 @@ export default class DropZone extends React.Component {
         onDragEnter={this.handleDragEnter}
         onDragLeave={this.handleDragLeave}
         className={classes([
+          className,
           'drop-zone',
           {
             active,
