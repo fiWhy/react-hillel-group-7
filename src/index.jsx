@@ -1,10 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { v4 as uuidv4 } from 'uuid';
 import Clock from './components/Clock';
 import TaskList from './components/TaskList';
 import Task from './components/Task';
 
 import tasks from './mocks/list';
+import TaskCreateForm from './components/TaskCreateForm';
+import DropZone from './components/DropZone';
 
 class App extends React.Component {
   constructor(props) {
@@ -16,6 +19,7 @@ class App extends React.Component {
     this.handleButtonClick = this.handleButtonClick.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.handleCheck = this.handleCheck.bind(this);
+    this.handleCreate = this.handleCreate.bind(this);
   }
 
   handleButtonClick() {
@@ -46,6 +50,19 @@ class App extends React.Component {
     });
   }
 
+  handleCreate(content) {
+    this.setState({
+      taskList: [
+        ...this.state.taskList,
+        {
+          id: uuidv4(),
+          content,
+          checked: false,
+        },
+      ],
+    });
+  }
+
   renderTaskList() {
     const { taskList } = this.state;
     return taskList.map((task, index) => (
@@ -70,7 +87,6 @@ class App extends React.Component {
       </div>
     );
   }
-
   componentDidMount() {
     Promise.resolve(tasks).then((tasks) => {
       this.setState({
@@ -86,8 +102,10 @@ class App extends React.Component {
     return (
       <div>
         <h3>App version: {version}</h3>
-        {showClock && <Clock />}
-        <button onClick={this.handleButtonClick}>Toggle clock</button>
+        {/* {showClock && <Clock />}
+        <button onClick={this.handleButtonClick}>Toggle clock</button> */}
+        <TaskCreateForm onCreate={this.handleCreate} />
+        <DropZone />
         <TaskList>{this.renderTaskList()}</TaskList>
         {this.renderStatistics()}
       </div>

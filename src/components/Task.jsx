@@ -1,10 +1,16 @@
 import React from 'react';
+import classes from 'classnames';
 
 class Task extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      dragging: false,
+    };
     this.handleToggleCheck = this.handleToggleCheck.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
+    this.handleDragStart = this.handleDragStart.bind(this);
+    this.handleDragEnd = this.handleDragEnd.bind(this);
   }
 
   handleToggleCheck() {
@@ -17,10 +23,33 @@ class Task extends React.Component {
     onDelete(id);
   }
 
+  handleDragStart() {
+    this.setState({
+      dragging: true,
+    });
+  }
+
+  handleDragEnd() {
+    this.setState({
+      dragging: false,
+    });
+  }
+
   render() {
     const { children, checked } = this.props;
+    const { dragging } = this.state;
     return (
-      <li>
+      <li
+        onDragStart={this.handleDragStart}
+        onDragEnd={this.handleDragEnd}
+        className={classes([
+          'to-do-list-task',
+          {
+            dragging,
+          },
+        ])}
+        draggable={true}
+      >
         <div>
           <span>
             <button

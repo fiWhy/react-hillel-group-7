@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatTimer } from '../utils/test-functionts';
+import { formatTimer } from '../utils/timer';
 
 export default class Clock extends React.Component {
   constructor(props) {

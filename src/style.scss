@@ -1,0 +1,18 @@
+.to-do-list-task {
+  &:hover {
+    cursor: grab;
+  }
+  &.dragging {
+    cursor: grabbing;
+  }
+}
+
+.drop-zone {
+  height: 5px;
+  width: 100%;
+  transition: height 0.5s, background-color 0.5s;
+  &.active {
+    height: 10px;
+    background-color: red;
+  }
+}
